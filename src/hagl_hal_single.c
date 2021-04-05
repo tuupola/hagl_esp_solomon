@@ -24,8 +24,8 @@ SOFTWARE.
 
 -cut-
 
-This file is part of the MIPI DCS HAL for HAGL graphics library:
-https://github.com/tuupola/hagl_esp_mipi/
+This file is part of the Solomon HAL for HAGL graphics library:
+https://github.com/tuupola/hagl_esp_solomon
 
 SPDX-License-Identifier: MIT
 
@@ -50,28 +50,28 @@ valid.
 #include <esp_log.h>
 #include <esp_heap_caps.h>
 #include <string.h>
-#include <mipi_display.h>
+#include <solomon_display.h>
 #include <bitmap.h>
 #include <hagl.h>
 
 
 static spi_device_handle_t spi;
-static const char *TAG = "hagl_esp_mipi";
+static const char *TAG = "hagl_esp_solomon";
 
 bitmap_t *hagl_hal_init(void)
 {
-    mipi_display_init(&spi);
+    solomon_display_init(&spi);
     return NULL;
 }
 
 void hagl_hal_put_pixel(int16_t x0, int16_t y0, color_t color)
 {
-    mipi_display_write(spi, x0, y0, 1, 1, (uint8_t *) &color);
+    solomon_display_write(spi, x0, y0, 1, 1, (uint8_t *) &color);
 }
 
 void hagl_hal_blit(uint16_t x0, uint16_t y0, bitmap_t *src)
 {
-    mipi_display_write(spi, x0, y0, src->width, src->height, (uint8_t *) src->buffer);
+    solomon_display_write(spi, x0, y0, src->width, src->height, (uint8_t *) src->buffer);
 }
 
 void hagl_hal_hline(int16_t x0, int16_t y0, uint16_t width, color_t color)
@@ -84,7 +84,7 @@ void hagl_hal_hline(int16_t x0, int16_t y0, uint16_t width, color_t color)
         *(ptr++) = color;
     }
 
-    mipi_display_write(spi, x0, y0, width, height, (uint8_t *) line);
+    solomon_display_write(spi, x0, y0, width, height, (uint8_t *) line);
 }
 
 void hagl_hal_vline(int16_t x0, int16_t y0, uint16_t height, color_t color)
@@ -97,7 +97,7 @@ void hagl_hal_vline(int16_t x0, int16_t y0, uint16_t height, color_t color)
         *(ptr++) = color;
     }
 
-    mipi_display_write(spi, x0, y0, width, height, (uint8_t *) line);
+    solomon_display_write(spi, x0, y0, width, height, (uint8_t *) line);
 }
 
 #endif /* CONFIG_HAGL_HAL_NO_BUFFERING */

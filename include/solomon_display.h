@@ -2,7 +2,6 @@
 
 MIT License
 
-Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
 Copyright (c) 2019-2021 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,18 +24,15 @@ SOFTWARE.
 
 -cut-
 
-This code is based on Espressif provided SPI Master example which was
-released to Public Domain: https://goo.gl/ksC2Ln
-
-This file is part of the MIPI DCS Display Driver:
-https://github.com/tuupola/esp_mipi
+This file is part of the Solomon HAL for HAGL graphics library:
+https://github.com/tuupola/hagl_esp_solomon
 
 SPDX-License-Identifier: MIT
 
 */
 
-#ifndef _MIPI_DISPLAY_H
-#define _MIPI_DISPLAY_H
+#ifndef _SOLOMON_DISPLAY_H
+#define _SOLOMON_DISPLAY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +50,7 @@ extern "C" {
 
 #define SPI_MAX_TRANSFER_SIZE   (DISPLAY_WIDTH * DISPLAY_HEIGHT * DISPLAY_DEPTH)
 
-#define MIPI_DISPLAY_ADDRESS_MODE ( \
+#define SOLOMON_DISPLAY_ADDRESS_MODE ( \
     CONFIG_MIPI_DCS_ADDRESS_MODE_MIRROR_Y | \
     CONFIG_MIPI_DCS_ADDRESS_MODE_MIRROR_X | \
     CONFIG_MIPI_DCS_ADDRESS_MODE_SWAP_XY | \
@@ -63,12 +59,12 @@ extern "C" {
     CONFIG_MIPI_DCS_ADDRESS_MODE_BGR \
 )
 
-void mipi_display_init(spi_device_handle_t *spi);
-size_t mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer);
-void mipi_display_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size_t size);
-void mipi_display_close(spi_device_handle_t spi);
+void solomon_display_init(spi_device_handle_t *spi);
+size_t solomon_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer);
+void solomon_display_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size_t size);
+void solomon_display_close(spi_device_handle_t spi);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _MIPI_DISPLAY_H */
+#endif /* _SOLOMON_DISPLAY_H */

@@ -2,7 +2,6 @@
 
 MIT License
 
-Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
 Copyright (c) 2019-2021 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,11 +24,8 @@ SOFTWARE.
 
 -cut-
 
-This code is based on Espressif provided SPI Master example which was
-released to Public Domain: https://goo.gl/ksC2Ln
-
-This file is part of the MIPI DCS Display Driver:
-https://github.com/tuupola/esp_mipi
+This file is part of the Solomon HAL for HAGL graphics library:
+https://github.com/tuupola/hagl_esp_solomon
 
 SPDX-License-Identifier: MIT
 
@@ -50,13 +46,13 @@ SPDX-License-Identifier: MIT
 #include <esp_log.h>
 
 #include "sdkconfig.h"
-#include "mipi_dcs.h"
-#include "mipi_display.h"
+#include "ssd1351.h"
+#include "solomon_display.h"
 
-static const char *TAG = "mipi_display";
+static const char *TAG = "solomon_display";
 static SemaphoreHandle_t mutex;
 
-static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t command)
+static void solomon_display_write_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
     memset(&transaction, 0, sizeof(transaction));
@@ -72,7 +68,7 @@ static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t co
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
-static void mipi_display_write_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
+static void solomon_display_write_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
 {
     if (0 == length) {
         return;
@@ -92,7 +88,7 @@ static void mipi_display_write_data(spi_device_handle_t spi, const uint8_t *data
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
 }
 
-static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_t length)
+static void solomon_display_read_data(spi_device_handle_t spi, uint8_t *data, size_t length)
 {
     if (0 == length) {
         return;
@@ -105,16 +101,14 @@ static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_
     transaction.length = length * 8;
     transaction.rxlength = length * 8;
     transaction.rx_buffer = data;
-    //transaction.flags = SPI_TRANS_USE_RXDATA;
 
     /* Set DC high to denote data. */
     gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, 1);
-
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
 
-static void mipi_display_set_address(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+static void solomon_display_set_address(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
     uint8_t data[4];
     static uint16_t prev_x1, prev_x2, prev_y1, prev_y2;
 
@@ -125,34 +119,43 @@ static void mipi_display_set_address(spi_device_handle_t spi, uint16_t x1, uint1
 
     /* Change column address only if it has changed. */
     if ((prev_x1 != x1 || prev_x2 != x2)) {
-        mipi_display_write_command(spi, MIPI_DCS_SET_COLUMN_ADDRESS);
-        data[0] = x1 >> 8;
-        data[1] = x1 & 0xff;
-        data[2] = x2 >> 8;
-        data[3] = x2 & 0xff;
-        mipi_display_write_data(spi, data, 4);
+        solomon_display_write_command(spi, SSD1351_SET_COLUMN_ADDRESS);
+        // data[0] = x1 >> 8;
+        // data[1] = x1 & 0xff;
+        // data[2] = x2 >> 8;
+        // data[3] = x2 & 0xff;
+        // solomon_display_write_data(spi, data, 4);
+
+        data[0] = x1;
+        data[1] = x2;
+        solomon_display_write_data(spi, data, 2);
+
 
         prev_x1 = x1;
         prev_x2 = x2;
     }
 
-    /* Change page address only if it has changed. */
+    /* Change row address only if it has changed. */
     if ((prev_y1 != y1 || prev_y2 != y2)) {
-        mipi_display_write_command(spi, MIPI_DCS_SET_PAGE_ADDRESS);
-        data[0] = y1 >> 8;
-        data[1] = y1 & 0xff;
-        data[2] = y2 >> 8;
-        data[3] = y2 & 0xff;
-        mipi_display_write_data(spi, data, 4);
+        solomon_display_write_command(spi, SSD1351_SET_ROW_ADDRESS);
+        // data[0] = y1 >> 8;
+        // data[1] = y1 & 0xff;
+        // data[2] = y2 >> 8;
+        // data[3] = y2 & 0xff;
+        // solomon_display_write_data(spi, data, 4);
+
+        data[0] = y1;
+        data[1] = y2;
+        solomon_display_write_data(spi, data, 2);
 
         prev_y1 = y1;
         prev_y2 = y2;
     }
 
-    mipi_display_write_command(spi, MIPI_DCS_WRITE_MEMORY_START);
+    solomon_display_write_command(spi, SSD1351_WRITE_RAM_COMMAND);
 }
 
-size_t mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer)
+size_t solomon_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer)
 {
     if (0 == w || 0 == h) {
         return 0;
@@ -164,15 +167,15 @@ size_t mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uin
 
     xSemaphoreTake(mutex, portMAX_DELAY);
 
-    mipi_display_set_address(spi, x1, y1, x2, y2);
-    mipi_display_write_data(spi, buffer, size);
+    solomon_display_set_address(spi, x1, y1, x2, y2);
+    solomon_display_write_data(spi, buffer, size);
 
     xSemaphoreGive(mutex);
 
     return size;
 }
 
-static void mipi_display_spi_master_init(spi_device_handle_t *spi)
+static void solomon_display_spi_master_init(spi_device_handle_t *spi)
 {
     spi_bus_config_t buscfg = {
         .miso_io_num = CONFIG_MIPI_DISPLAY_PIN_MISO,
@@ -196,7 +199,20 @@ static void mipi_display_spi_master_init(spi_device_handle_t *spi)
     ESP_ERROR_CHECK(spi_bus_add_device(CONFIG_MIPI_DISPLAY_SPI_HOST, &devcfg, spi));
 }
 
-void mipi_display_init(spi_device_handle_t *spi)
+/*
+
+Power ON sequence:
+1. Power ON VCI, VDDIO.
+2. After VCI, VDDIO become stable, set wait time at least 1ms (t0) for internal VDD become stable. Then set
+RES# pin LOW (logic low) for at least 2us (t1) (4) and then HIGH (logic high).
+3. After set RES# pin LOW (logic low), wait for at least 2us (t2). Then Power ON VCC.
+(1)
+4. After VCC become stable, send command AFh for display ON. SEG/COM will be ON after 200ms (tAF).
+5. After VCI become stable, wait for at least 300ms to send command.
+
+*/
+
+void solomon_display_init(spi_device_handle_t *spi)
 {
     mutex = xSemaphoreCreateMutex();
 
@@ -207,39 +223,38 @@ void mipi_display_init(spi_device_handle_t *spi)
 
     gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
 
-    mipi_display_spi_master_init(spi);
+    solomon_display_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
     /* Reset the display. */
     if (CONFIG_MIPI_DISPLAY_PIN_RST > 0) {
         gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_RST, GPIO_MODE_OUTPUT);
+        /* Low will reset ie. initialize the display with defaults. */
         gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 0);
         vTaskDelay(100 / portTICK_RATE_MS);
+        /* High resumes normal operation. */
         gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 1);
         vTaskDelay(100 / portTICK_RATE_MS);
     }
 
-    /* Send minimal init commands. */
-    mipi_display_write_command(*spi, MIPI_DCS_SOFT_RESET);
-    vTaskDelay(200 / portTICK_RATE_MS);
+    solomon_display_write_command(*spi, SSD1351_SET_SLEEP_MODE_OFF);
 
-    mipi_display_write_command(*spi, MIPI_DCS_SET_ADDRESS_MODE);
-    mipi_display_write_data(*spi, &(uint8_t){MIPI_DISPLAY_ADDRESS_MODE}, 1);
+    /* Unlock the display ie. start accepting commands. */
+    solomon_display_write_command(*spi, SSD1351_SET_COMMAND_LOCK);
+    solomon_display_write_data(*spi, &(uint8_t){SSD1351_SET_COMMAND_LOCK_UNLOCK}, 1);
 
-    mipi_display_write_command(*spi, MIPI_DCS_SET_PIXEL_FORMAT);
-    mipi_display_write_data(*spi, &(uint8_t){CONFIG_MIPI_DISPLAY_PIXEL_FORMAT}, 1);
+    solomon_display_write_command(*spi, SSD1351_SET_REMAP_DUAL_COM_LINE);
+    solomon_display_write_data(*spi, &(uint8_t){ SD1351_COLOR_MODE_65K | SD1351_COLOR_REMAP | SD1351_COLUMN_ADDRESS_REMAP }, 1);
+
+    /* SSD1351_SET_DISPLAY_OFFSET defaults to 0x60. */
+    solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_OFFSET);
+    solomon_display_write_data(*spi, &(uint8_t){0x00}, 1);
 
 #ifdef CONFIG_MIPI_DISPLAY_INVERT
-    mipi_display_write_command(*spi, MIPI_DCS_ENTER_INVERT_MODE);
+    solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_INVERSE);
 #else
-    mipi_display_write_command(*spi, MIPI_DCS_EXIT_INVERT_MODE);
+    solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_NORMAL);
 #endif
-
-    mipi_display_write_command(*spi, MIPI_DCS_EXIT_SLEEP_MODE);
-    vTaskDelay(200 / portTICK_RATE_MS);
-
-    mipi_display_write_command(*spi, MIPI_DCS_SET_DISPLAY_ON);
-    vTaskDelay(200 / portTICK_RATE_MS);
 
     /* Enable backlight. */
     if (CONFIG_MIPI_DISPLAY_PIN_BL > 0) {
@@ -278,41 +293,41 @@ void mipi_display_init(spi_device_handle_t *spi)
     spi_device_acquire_bus(*spi, portMAX_DELAY);
 }
 
-void mipi_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t *data, size_t size)
+void solomon_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t *data, size_t size)
 {
     xSemaphoreTake(mutex, portMAX_DELAY);
 
-    switch (command) {
-        case MIPI_DCS_GET_COMPRESSION_MODE:
-        case MIPI_DCS_GET_DISPLAY_ID:
-        case MIPI_DCS_GET_RED_CHANNEL:
-        case MIPI_DCS_GET_GREEN_CHANNEL:
-        case MIPI_DCS_GET_BLUE_CHANNEL:
-        case MIPI_DCS_GET_DISPLAY_STATUS:
-        case MIPI_DCS_GET_POWER_MODE:
-        case MIPI_DCS_GET_ADDRESS_MODE:
-        case MIPI_DCS_GET_PIXEL_FORMAT:
-        case MIPI_DCS_GET_DISPLAY_MODE:
-        case MIPI_DCS_GET_SIGNAL_MODE:
-        case MIPI_DCS_GET_DIAGNOSTIC_RESULT:
-        case MIPI_DCS_GET_SCANLINE:
-        case MIPI_DCS_GET_DISPLAY_BRIGHTNESS:
-        case MIPI_DCS_GET_CONTROL_DISPLAY:
-        case MIPI_DCS_GET_POWER_SAVE:
-        case MIPI_DCS_READ_DDB_START:
-        case MIPI_DCS_READ_DDB_CONTINUE:
-            mipi_display_write_command(spi, command);
-            mipi_display_read_data(spi, data, size);
-            break;
-        default:
-            mipi_display_write_command(spi, command);
-            mipi_display_write_data(spi, data, size);
-    }
+    // switch (command) {
+    //     case MIPI_DCS_GET_COMPRESSION_MODE:
+    //     case MIPI_DCS_GET_DISPLAY_ID:
+    //     case MIPI_DCS_GET_RED_CHANNEL:
+    //     case MIPI_DCS_GET_GREEN_CHANNEL:
+    //     case MIPI_DCS_GET_BLUE_CHANNEL:
+    //     case MIPI_DCS_GET_DISPLAY_STATUS:
+    //     case MIPI_DCS_GET_POWER_MODE:
+    //     case MIPI_DCS_GET_ADDRESS_MODE:
+    //     case MIPI_DCS_GET_PIXEL_FORMAT:
+    //     case MIPI_DCS_GET_DISPLAY_MODE:
+    //     case MIPI_DCS_GET_SIGNAL_MODE:
+    //     case MIPI_DCS_GET_DIAGNOSTIC_RESULT:
+    //     case MIPI_DCS_GET_SCANLINE:
+    //     case MIPI_DCS_GET_DISPLAY_BRIGHTNESS:
+    //     case MIPI_DCS_GET_CONTROL_DISPLAY:
+    //     case MIPI_DCS_GET_POWER_SAVE:
+    //     case MIPI_DCS_READ_DDB_START:
+    //     case MIPI_DCS_READ_DDB_CONTINUE:
+    //         solomon_display_write_command(spi, command);
+    //         solomon_display_read_data(spi, data, size);
+    //         break;
+    //     default:
+    //         solomon_display_write_command(spi, command);
+    //         solomon_display_write_data(spi, data, size);
+    // }
 
     xSemaphoreGive(mutex);
 }
 
-void mipi_display_close(spi_device_handle_t spi)
+void solomon_display_close(spi_device_handle_t spi)
 {
     spi_device_release_bus(spi);
 }
