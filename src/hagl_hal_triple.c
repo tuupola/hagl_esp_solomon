@@ -44,14 +44,14 @@ valid.
 #include "sdkconfig.h"
 #include "hagl_hal.h"
 
-#ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFER
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_log.h>
 #include <esp_heap_caps.h>
 #include <string.h>
-#include <mipi_display.h>
+#include <solomon_display.h>
 #include <bitmap.h>
 #include <hagl.h>
 
@@ -70,7 +70,7 @@ static const char *TAG = "hagl_esp_mipi";
 
 bitmap_t *hagl_hal_init(void)
 {
-    mipi_display_init(&spi);
+    solomon_display_init(&spi);
 
     ESP_LOGI(TAG, "Triple buffering mode");
     ESP_LOGI(
@@ -129,7 +129,7 @@ size_t hagl_hal_flush()
     } else {
         fb.buffer = buffer1;
     }
-    return mipi_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) buffer);
+    return solomon_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) buffer);
 }
 
 void hagl_hal_put_pixel(int16_t x0, int16_t y0, color_t color)
@@ -178,4 +178,4 @@ void hagl_hal_clear_screen()
 }
 
 
-#endif /* #ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFERING */
+#endif /* #ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFER */

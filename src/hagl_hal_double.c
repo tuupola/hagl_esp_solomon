@@ -49,11 +49,11 @@ valid.
 #include <esp_log.h>
 #include <esp_heap_caps.h>
 #include <string.h>
-#include <mipi_display.h>
+#include <solomon_display.h>
 #include <bitmap.h>
 #include <hagl.h>
 
-#ifdef CONFIG_HAGL_HAL_USE_DOUBLE_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_DOUBLE_BUFFER
 #ifdef CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING
 static SemaphoreHandle_t mutex;
 #endif /* CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING */
@@ -70,7 +70,7 @@ static const char *TAG = "hagl_esp_mipi";
 
 bitmap_t *hagl_hal_init(void)
 {
-    mipi_display_init(&spi);
+    solomon_display_init(&spi);
 #ifdef CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING
     mutex = xSemaphoreCreateMutex();
 #endif /* CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING */
@@ -106,12 +106,12 @@ size_t hagl_hal_flush()
     size_t size = 0;
     /* Flush the whole back buffer with locking. */
     xSemaphoreTake(mutex, portMAX_DELAY);
-    size = mipi_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) fb.buffer);
+    size = solomon_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) fb.buffer);
     xSemaphoreGive(mutex);
     return size;
 #else
     /* Flush the whole back buffer. */
-    return mipi_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) fb.buffer);
+    return solomon_display_write(spi, 0, 0, fb.width, fb.height, (uint8_t *) fb.buffer);
 #endif /* CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING */
 }
 
@@ -194,5 +194,5 @@ void hagl_hal_clear_screen()
 #endif /* CONFIG_HAGL_HAL_LOCK_WHEN_FLUSHING */
 }
 
-#endif /* CONFIG_HAGL_HAL_USE_DOUBLE_BUFFERING */
+#endif /* CONFIG_HAGL_HAL_USE_DOUBLE_BUFFER */
 

@@ -66,15 +66,15 @@ typedef uint8_t color_t;
 typedef uint8_t color_t;
 #endif
 
-#ifdef CONFIG_HAGL_HAL_NO_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_SINGLE_BUFFER
 #include "hagl_hal_single.h"
 #endif
 
-#ifdef CONFIG_HAGL_HAL_USE_DOUBLE_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_DOUBLE_BUFFER
 #include "hagl_hal_double.h"
 #endif
 
-#ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_TRIPLE_BUFFER
 #include "hagl_hal_triple.h"
 #endif
 

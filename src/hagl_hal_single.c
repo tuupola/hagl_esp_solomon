@@ -43,7 +43,7 @@ valid.
 #include "sdkconfig.h"
 #include "hagl_hal.h"
 
-#ifdef CONFIG_HAGL_HAL_NO_BUFFERING
+#ifdef CONFIG_HAGL_HAL_USE_SINGLE_BUFFER
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -100,4 +100,4 @@ void hagl_hal_vline(int16_t x0, int16_t y0, uint16_t height, color_t color)
     solomon_display_write(spi, x0, y0, width, height, (uint8_t *) line);
 }
 
-#endif /* CONFIG_HAGL_HAL_NO_BUFFERING */
+#endif /* CONFIG_HAGL_HAL_USE_SINGLE_BUFFER */

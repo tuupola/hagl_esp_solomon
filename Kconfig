@@ -1,4 +1,4 @@
-menu "Hardware Agnostic Graphics Library HAL (MIPI)"
+menu "HAGL HAL for Solomon displays"
 
 menu "Display orientation"
     config MIPI_DCS_ADDRESS_MODE_MIRROR_Y_SELECTED
@@ -75,19 +75,19 @@ config MIPI_DISPLAY_DEPTH
 
 choice
     prompt "Buffering"
-    default HAGL_HAL_NO_BUFFERING
-    config HAGL_HAL_NO_BUFFERING
-        bool "disabled"
-    config HAGL_HAL_USE_DOUBLE_BUFFERING
+    default HAGL_HAL_USE_SINGLE_BUFFER
+    config HAGL_HAL_USE_SINGLE_BUFFER
+        bool "single"
+    config HAGL_HAL_USE_DOUBLE_BUFFER
         bool "double"
-    config HAGL_HAL_USE_TRIPLE_BUFFERING
+    config HAGL_HAL_USE_TRIPLE_BUFFER
         bool "triple"
 endchoice
 
 config HAGL_HAL_LOCK_WHEN_FLUSHING
     bool "Lock back buffer when flushing"
     default n
-    depends on HAGL_HAL_USE_DOUBLE_BUFFERING
+    depends on HAGL_HAL_USE_DOUBLE_BUFFER
 
 config MIPI_DISPLAY_WIDTH
     int "Display width in pixels"
