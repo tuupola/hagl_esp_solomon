@@ -11,7 +11,7 @@ To use with an ESP-IDF project you include this HAL and the [HAGL graphics libra
 
 ```
 $ cd components
-$ git submodule add git@github.com:tuupola/hagl_esp_mipi.git hagl_hal
+$ git submodule add git@github.com:tuupola/hagl_esp_solomon.git hagl_hal
 $ git submodule add git@github.com:tuupola/hagl.git
 ```
 
