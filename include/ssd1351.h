@@ -77,14 +77,14 @@ extern "C" {
 #define SSD1351_SET_COMMAND_LOCK_UNLOCK             (0xb1)
 
 /* For SSD1351_SET_REMAP_DUAL_COM_LINE. */
-#define SD1351_HORIZONTAL_ADDRESS_INCREMENT         (0b00000000)
-#define SD1351_VERTICAL_ADDRESS_INCREMENT           (0b00000001)
-#define SD1351_COLUMN_ADDRESS_REMAP                 (0b00000010) /* Mirror X */
-#define SD1351_COLOR_REMAP                          (0b00000100) /* RGB to BGR */
-#define SD1351_COM_SCAN_DIRECTION_REMAP             (0b00001000)
-#define SD1351_COM_ODD_EVEN_SPLIT                   (0b00010000) /* Mirror Y */
-#define SD1351_COLOR_MODE_65K                       (0b00100000) /* RGB565 */
-#define SD1351_COLOR_MODE_262K                      (0b01000000) /* RGB666 */
+#define SD1351_HORIZONTAL_ADDRESS_INCREMENT         (0b00000000) /* 0x00 */
+#define SD1351_VERTICAL_ADDRESS_INCREMENT           (0b00000001) /* Swap XY 0x01 */
+#define SD1351_COLUMN_ADDRESS_REMAP                 (0b00000010) /* Mirror X 0x02 */
+#define SD1351_COLOR_REMAP                          (0b00000100) /* RGB to BGR 0x04 */
+#define SD1351_COM_SCAN_DIRECTION_REMAP             (0b00001000) /* 0x08 */
+#define SD1351_COM_ODD_EVEN_SPLIT                   (0b00010000) /* Mirror Y 0x10 */
+#define SD1351_COLOR_MODE_65K                       (0b00100000) /* RGB565 0x20 */
+#define SD1351_COLOR_MODE_262K                      (0b01000000) /* RGB666 0x40 */
 #define SD1351_COLOR_MODE_262K_FORMAT2              (0b01100000) /* RGB666 format 2 */
 
 #ifdef __cplusplus

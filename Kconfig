@@ -1,77 +1,47 @@
 menu "HAGL HAL for Solomon displays"
 
 menu "Display orientation"
-    config MIPI_DCS_ADDRESS_MODE_MIRROR_Y_SELECTED
+    config SOLOMON_MIRROR_Y_SELECTED
         bool "Mirror Y"
-    config MIPI_DCS_ADDRESS_MODE_MIRROR_X_SELECTED
+    config SOLOMON_MIRROR_X_SELECTED
         bool "Mirror X"
-    config MIPI_DCS_ADDRESS_MODE_SWAP_XY_SELECTED
+    config SOLOMON_SWAP_XY_SELECTED
         bool "Swap X and Y"
-    config MIPI_DCS_ADDRESS_MODE_FLIP_X_SELECTED
-        bool "Flip X"
-    config MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
-        bool "Flip Y"
 endmenu
 
-config MIPI_DCS_ADDRESS_MODE_MIRROR_Y
+config SOLOMON_MIRROR_Y
     hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_MIRROR_Y_SELECTED
-    default 0x80 if MIPI_DCS_ADDRESS_MODE_MIRROR_Y_SELECTED
+    default 0x00 if !SOLOMON_MIRROR_Y_SELECTED
+    default 0x10 if SOLOMON_MIRROR_Y_SELECTED
 
-config MIPI_DCS_ADDRESS_MODE_MIRROR_X
+config SOLOMON_MIRROR_X
     hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_MIRROR_X_SELECTED
-    default 0x40 if MIPI_DCS_ADDRESS_MODE_MIRROR_X_SELECTED
+    default 0x00 if !SOLOMON_MIRROR_X_SELECTED
+    default 0x02 if SOLOMON_MIRROR_X_SELECTED
 
-config MIPI_DCS_ADDRESS_MODE_SWAP_XY
+config SOLOMON_SWAP_XY
     hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_SWAP_XY_SELECTED
-    default 0x20 if MIPI_DCS_ADDRESS_MODE_SWAP_XY_SELECTED
+    default 0x00 if !SOLOMON_SWAP_XY_SELECTED
+    default 0x01 if SOLOMON_SWAP_XY_SELECTED
 
-config MIPI_DCS_ADDRESS_MODE_FLIP_X
-    hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_FLIP_X_SELECTED
-    default 0x02 if MIPI_DCS_ADDRESS_MODE_FLIP_X_SELECTED
-
-config MIPI_DCS_ADDRESS_MODE_FLIP_Y
-    hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
-    default 0x01 if MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
-
-choice MIPI_PIXEL_FORMAT
+choice SOLOMON_PIXEL_FORMAT
     prompt "Pixel format"
-    default MIPI_DCS_PIXEL_FORMAT_16BIT_SELECTED
-    config MIPI_DCS_PIXEL_FORMAT_24BIT_SELECTED
-        bool "24 bit"
-    config MIPI_DCS_PIXEL_FORMAT_18BIT_SELECTED
+    default SOLOMON_PIXEL_FORMAT_16BIT_SELECTED
+    config SOLOMON_PIXEL_FORMAT_18BIT_SELECTED
         bool "18 bit"
-    config MIPI_DCS_PIXEL_FORMAT_16BIT_SELECTED
+    config SOLOMON_PIXEL_FORMAT_16BIT_SELECTED
         bool "16 bit"
-    config MIPI_DCS_PIXEL_FORMAT_12BIT_SELECTED
-        bool "12 bit"
-    config MIPI_DCS_PIXEL_FORMAT_8BIT_SELECTED
-        bool "8 bit"
-    config MIPI_DCS_PIXEL_FORMAT_3BIT_SELECTED
-        bool "3 bit"
 endchoice
 
-config MIPI_DISPLAY_PIXEL_FORMAT
+config SOLOMON_DISPLAY_PIXEL_FORMAT
     hex
-    default 0x77 if MIPI_DCS_PIXEL_FORMAT_24BIT_SELECTED
-    default 0x66 if MIPI_DCS_PIXEL_FORMAT_18BIT_SELECTED
-    default 0x55 if MIPI_DCS_PIXEL_FORMAT_16BIT_SELECTED
-    default 0x33 if MIPI_DCS_PIXEL_FORMAT_12BIT_SELECTED
-    default 0x22 if MIPI_DCS_PIXEL_FORMAT_8BIT_SELECTED
-    default 0x11 if MIPI_DCS_PIXEL_FORMAT_3BIT_SELECTED
+    default 0x40 if SOLOMON_PIXEL_FORMAT_18BIT_SELECTED
+    default 0x20 if SOLOMON_PIXEL_FORMAT_16BIT_SELECTED
 
-config MIPI_DISPLAY_DEPTH
+config SOLOMON_DISPLAY_DEPTH
     int
-    default 24 if MIPI_DCS_PIXEL_FORMAT_24BIT_SELECTED
-    default 18 if MIPI_DCS_PIXEL_FORMAT_18BIT_SELECTED
-    default 16 if MIPI_DCS_PIXEL_FORMAT_16BIT_SELECTED
-    default 12 if MIPI_DCS_PIXEL_FORMAT_12BIT_SELECTED
-    default 8 if MIPI_DCS_PIXEL_FORMAT_8BIT_SELECTED
-    default 3 if MIPI_DCS_PIXEL_FORMAT_3BIT_SELECTED
+    default 18 if SOLOMON_PIXEL_FORMAT_18BIT_SELECTED
+    default 16 if SOLOMON_PIXEL_FORMAT_16BIT_SELECTED
 
 choice
     prompt "Buffering"
@@ -89,46 +59,46 @@ config HAGL_HAL_LOCK_WHEN_FLUSHING
     default n
     depends on HAGL_HAL_USE_DOUBLE_BUFFER
 
-config MIPI_DISPLAY_WIDTH
+config SOLOMON_DISPLAY_WIDTH
     int "Display width in pixels"
     default 320
 
-config MIPI_DISPLAY_HEIGHT
+config SOLOMON_DISPLAY_HEIGHT
     int "Display height in pixels"
     default 240
 
-config MIPI_DISPLAY_OFFSET_X
+config SOLOMON_DISPLAY_OFFSET_X
     int "X offset"
     default 0
     help
         Adjust when using small display and image is not centered.
 
-config MIPI_DISPLAY_OFFSET_Y
+config SOLOMON_DISPLAY_OFFSET_Y
     int "Y offset"
     default 0
     help
         Adjust when using small display and image is not centered.
 
-config MIPI_DISPLAY_INVERT
+config SOLOMON_DISPLAY_INVERT
     bool "Invert colors"
 
-config MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
+config SOLOMON_BGR_MODE_SELECTED
     bool "BGR"
     default n
 
-config MIPI_DCS_ADDRESS_MODE_BGR
+config SOLOMON_MODE_BGR_RGB
     hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
-    default 0x08 if MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
+    default 0x00 if !SOLOMON_BGR_MODE_SELECTED
+    default 0x04 if SOLOMON_BGR_MODE_SELECTED
 
-config MIPI_DISPLAY_SPI_CLOCK_SPEED_HZ
+config SOLOMON_DISPLAY_SPI_CLOCK_SPEED_HZ
     int "SPI clock speed in Hz"
     default 40000000
     range 0 80000000
     help
         SPI clock speed in Hz. If you have problems try a lower value.
 
-config MIPI_DISPLAY_SPI_MODE
+config SOLOMON_DISPLAY_SPI_MODE
     int "SPI mode"
     default 0
     range 0 3
@@ -147,7 +117,7 @@ choice
         bool "VSPI_HOST"
 endchoice
 
-config MIPI_DISPLAY_SPI_HOST
+config SOLOMON_DISPLAY_SPI_HOST
     hex
     default 0x01 if ESP32_HSPI_HOST_SELECTED
     default 0x02 if ESP32_VSPI_HOST_SELECTED
@@ -164,44 +134,44 @@ choice
         bool "HSPI_HOST"
 endchoice
 
-config MIPI_DISPLAY_SPI_HOST
+config SOLOMON_DISPLAY_SPI_HOST
     hex
     default 0x01 if ESP32S2_FSPI_HOST_SELECTED
     default 0x02 if ESP32S2_HSPI_HOST_SELECTED
 endif
 
-config MIPI_DISPLAY_PIN_MISO
+config SOLOMON_DISPLAY_PIN_MISO
     int "MISO pin number"
     default -1
 
-config MIPI_DISPLAY_PIN_MOSI
+config SOLOMON_DISPLAY_PIN_MOSI
     int "MOSI pin number"
     default 23
 
-config MIPI_DISPLAY_PIN_CLK
+config SOLOMON_DISPLAY_PIN_CLK
     int "CLK pin number"
     default 18
 
-config MIPI_DISPLAY_PIN_CS
+config SOLOMON_DISPLAY_PIN_CS
     int "CS pin number"
     default 14
 
-config MIPI_DISPLAY_PIN_DC
+config SOLOMON_DISPLAY_PIN_DC
     int "DC pin number"
     default 27
 
-config MIPI_DISPLAY_PIN_RST
+config SOLOMON_DISPLAY_PIN_RST
     int "RST pin number"
     default 33
     help
         RST pin number. Defaults are ok for M5Stick.
 
-config MIPI_DISPLAY_PIN_BL
+config SOLOMON_DISPLAY_PIN_BL
     int "Backlight pin number"
     default 32
 
-if MIPI_DISPLAY_PIN_BL != -1
-    config MIPI_DISPLAY_PWM_BL
+if SOLOMON_DISPLAY_PIN_BL != -1
+    config SOLOMON_DISPLAY_PWM_BL
         int "Backlight PWM duty cycle (brightness)"
         range -1 8191
         default -1
@@ -211,8 +181,8 @@ if MIPI_DISPLAY_PIN_BL != -1
             drives the backlight pin high.
 endif
 
-config MIPI_DISPLAY_PWM_BL
+config SOLOMON_DISPLAY_PWM_BL
     int
-    default -1 if MIPI_DISPLAY_PIN_BL = -1
+    default -1 if SOLOMON_DISPLAY_PIN_BL = -1
 
 endmenu

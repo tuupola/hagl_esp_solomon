@@ -64,7 +64,7 @@ static void solomon_display_write_command(spi_device_handle_t spi, const uint8_t
     ESP_LOGD(TAG, "Sending command 0x%02x", (uint8_t)command);
 
     /* Set DC low to denote a command. */
-    gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, 0);
+    gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_DC, 0);
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
@@ -82,7 +82,7 @@ static void solomon_display_write_data(spi_device_handle_t spi, const uint8_t *d
     transaction.tx_buffer = data;
 
     /* Set DC high to denote data. */
-    gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, 1);
+    gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_DC, 1);
 
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
@@ -103,19 +103,18 @@ static void solomon_display_read_data(spi_device_handle_t spi, uint8_t *data, si
     transaction.rx_buffer = data;
 
     /* Set DC high to denote data. */
-    gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, 1);
+    gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_DC, 1);
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
-
 
 static void solomon_display_set_address(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
     uint8_t data[4];
     static uint16_t prev_x1, prev_x2, prev_y1, prev_y2;
 
-    x1 = x1 + CONFIG_MIPI_DISPLAY_OFFSET_X;
-    y1 = y1 + CONFIG_MIPI_DISPLAY_OFFSET_Y;
-    x2 = x2 + CONFIG_MIPI_DISPLAY_OFFSET_X;
-    y2 = y2 + CONFIG_MIPI_DISPLAY_OFFSET_Y;
+    x1 = x1 + CONFIG_SOLOMON_DISPLAY_OFFSET_X;
+    y1 = y1 + CONFIG_SOLOMON_DISPLAY_OFFSET_Y;
+    x2 = x2 + CONFIG_SOLOMON_DISPLAY_OFFSET_X;
+    y2 = y2 + CONFIG_SOLOMON_DISPLAY_OFFSET_Y;
 
     /* Change column address only if it has changed. */
     if ((prev_x1 != x1 || prev_x2 != x2)) {
@@ -178,25 +177,25 @@ size_t solomon_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, 
 static void solomon_display_spi_master_init(spi_device_handle_t *spi)
 {
     spi_bus_config_t buscfg = {
-        .miso_io_num = CONFIG_MIPI_DISPLAY_PIN_MISO,
-        .mosi_io_num = CONFIG_MIPI_DISPLAY_PIN_MOSI,
-        .sclk_io_num = CONFIG_MIPI_DISPLAY_PIN_CLK,
+        .miso_io_num = CONFIG_SOLOMON_DISPLAY_PIN_MISO,
+        .mosi_io_num = CONFIG_SOLOMON_DISPLAY_PIN_MOSI,
+        .sclk_io_num = CONFIG_SOLOMON_DISPLAY_PIN_CLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
         /* Max transfer size in bytes. */
         .max_transfer_sz = SPI_MAX_TRANSFER_SIZE
     };
     spi_device_interface_config_t devcfg = {
-        .clock_speed_hz = CONFIG_MIPI_DISPLAY_SPI_CLOCK_SPEED_HZ,
-        .mode = CONFIG_MIPI_DISPLAY_SPI_MODE,
-        .spics_io_num = CONFIG_MIPI_DISPLAY_PIN_CS,
+        .clock_speed_hz = CONFIG_SOLOMON_DISPLAY_SPI_CLOCK_SPEED_HZ,
+        .mode = CONFIG_SOLOMON_DISPLAY_SPI_MODE,
+        .spics_io_num = CONFIG_SOLOMON_DISPLAY_PIN_CS,
         .queue_size = 64,
         .flags = SPI_DEVICE_NO_DUMMY
     };
 
     /* ESP32S2 requires DMA channel to match the SPI host. */
-    ESP_ERROR_CHECK(spi_bus_initialize(CONFIG_MIPI_DISPLAY_SPI_HOST, &buscfg, CONFIG_MIPI_DISPLAY_SPI_HOST));
-    ESP_ERROR_CHECK(spi_bus_add_device(CONFIG_MIPI_DISPLAY_SPI_HOST, &devcfg, spi));
+    ESP_ERROR_CHECK(spi_bus_initialize(CONFIG_SOLOMON_DISPLAY_SPI_HOST, &buscfg, CONFIG_SOLOMON_DISPLAY_SPI_HOST));
+    ESP_ERROR_CHECK(spi_bus_add_device(CONFIG_SOLOMON_DISPLAY_SPI_HOST, &devcfg, spi));
 }
 
 /*
@@ -216,24 +215,24 @@ void solomon_display_init(spi_device_handle_t *spi)
 {
     mutex = xSemaphoreCreateMutex();
 
-    if (CONFIG_MIPI_DISPLAY_PIN_CS > 0) {
-        gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_CS, GPIO_MODE_OUTPUT);
-        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_CS, 0);
+    if (CONFIG_SOLOMON_DISPLAY_PIN_CS > 0) {
+        gpio_set_direction(CONFIG_SOLOMON_DISPLAY_PIN_CS, GPIO_MODE_OUTPUT);
+        gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_CS, 0);
     };
 
-    gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
+    gpio_set_direction(CONFIG_SOLOMON_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
 
     solomon_display_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
     /* Reset the display. */
-    if (CONFIG_MIPI_DISPLAY_PIN_RST > 0) {
-        gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_RST, GPIO_MODE_OUTPUT);
+    if (CONFIG_SOLOMON_DISPLAY_PIN_RST > 0) {
+        gpio_set_direction(CONFIG_SOLOMON_DISPLAY_PIN_RST, GPIO_MODE_OUTPUT);
         /* Low will reset ie. initialize the display with defaults. */
-        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 0);
+        gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_RST, 0);
         vTaskDelay(100 / portTICK_RATE_MS);
         /* High resumes normal operation. */
-        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 1);
+        gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_RST, 1);
         vTaskDelay(100 / portTICK_RATE_MS);
     }
 
@@ -244,25 +243,26 @@ void solomon_display_init(spi_device_handle_t *spi)
     solomon_display_write_data(*spi, &(uint8_t){SSD1351_SET_COMMAND_LOCK_UNLOCK}, 1);
 
     solomon_display_write_command(*spi, SSD1351_SET_REMAP_DUAL_COM_LINE);
-    solomon_display_write_data(*spi, &(uint8_t){ SD1351_COLOR_MODE_65K | SD1351_COLOR_REMAP | SD1351_COLUMN_ADDRESS_REMAP }, 1);
+    //solomon_display_write_data(*spi, &(uint8_t){ SD1351_COLOR_MODE_65K | SD1351_COLOR_REMAP | SD1351_COLUMN_ADDRESS_REMAP }, 1);
+    solomon_display_write_data(*spi, &(uint8_t){ CONFIG_SOLOMON_DISPLAY_PIXEL_FORMAT | CONFIG_SOLOMON_MODE_BGR_RGB | CONFIG_SOLOMON_MIRROR_X | CONFIG_SOLOMON_MIRROR_Y | CONFIG_SOLOMON_SWAP_XY }, 1);
 
     /* SSD1351_SET_DISPLAY_OFFSET defaults to 0x60. */
     solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_OFFSET);
     solomon_display_write_data(*spi, &(uint8_t){0x00}, 1);
 
-#ifdef CONFIG_MIPI_DISPLAY_INVERT
+#ifdef CONFIG_SOLOMON_DISPLAY_INVERT
     solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_INVERSE);
 #else
     solomon_display_write_command(*spi, SSD1351_SET_DISPLAY_NORMAL);
 #endif
 
     /* Enable backlight. */
-    if (CONFIG_MIPI_DISPLAY_PIN_BL > 0) {
-        gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_BL, GPIO_MODE_OUTPUT);
-        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_BL, 1);
+    if (CONFIG_SOLOMON_DISPLAY_PIN_BL > 0) {
+        gpio_set_direction(CONFIG_SOLOMON_DISPLAY_PIN_BL, GPIO_MODE_OUTPUT);
+        gpio_set_level(CONFIG_SOLOMON_DISPLAY_PIN_BL, 1);
 
         /* Enable backlight PWM. */
-        if (CONFIG_MIPI_DISPLAY_PWM_BL > 0) {
+        if (CONFIG_SOLOMON_DISPLAY_PWM_BL > 0) {
             ESP_LOGI(TAG, "Initializing backlight PWM");
             ledc_timer_config_t timercfg = {
                 .duty_resolution = LEDC_TIMER_13_BIT,
@@ -276,8 +276,8 @@ void solomon_display_init(spi_device_handle_t *spi)
 
             ledc_channel_config_t channelcfg = {
                 .channel    = LEDC_CHANNEL_0,
-                .duty       = CONFIG_MIPI_DISPLAY_PWM_BL,
-                .gpio_num   = CONFIG_MIPI_DISPLAY_PIN_BL,
+                .duty       = CONFIG_SOLOMON_DISPLAY_PWM_BL,
+                .gpio_num   = CONFIG_SOLOMON_DISPLAY_PIN_BL,
                 .speed_mode = LEDC_LOW_SPEED_MODE,
                 .hpoint     = 0,
                 .timer_sel  = LEDC_TIMER_0,

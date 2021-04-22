@@ -41,29 +41,13 @@ extern "C" {
 #include <stdint.h>
 #include "sdkconfig.h"
 
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_24BIT_SELECTED
+#ifdef CONFIG_SOLOMON_PIXEL_FORMAT_18BIT_SELECTED
 typedef uint32_t color_t;
 #endif
 
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_18BIT_SELECTED
-typedef uint32_t color_t;
-#endif
-
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_16BIT_SELECTED
+#ifdef CONFIG_SOLOMON_PIXEL_FORMAT_16BIT_SELECTED
 /* Currently only this, ie. RGB565 is properly tested. */
 typedef uint16_t color_t;
-#endif
-
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_12BIT_SELECTED
-typedef uint16_t color_t;
-#endif
-
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_8BIT_SELECTED
-typedef uint8_t color_t;
-#endif
-
-#ifdef CONFIG_MIPI_DCS_PIXEL_FORMAT_3BIT_SELECTED
-typedef uint8_t color_t;
 #endif
 
 #ifdef CONFIG_HAGL_HAL_USE_SINGLE_BUFFER
@@ -78,9 +62,9 @@ typedef uint8_t color_t;
 #include "hagl_hal_triple.h"
 #endif
 
-#define DISPLAY_WIDTH       (CONFIG_MIPI_DISPLAY_WIDTH)
-#define DISPLAY_HEIGHT      (CONFIG_MIPI_DISPLAY_HEIGHT)
-#define DISPLAY_DEPTH       (CONFIG_MIPI_DISPLAY_DEPTH)
+#define DISPLAY_WIDTH       (CONFIG_SOLOMON_DISPLAY_WIDTH)
+#define DISPLAY_HEIGHT      (CONFIG_SOLOMON_DISPLAY_HEIGHT)
+#define DISPLAY_DEPTH       (CONFIG_SOLOMON_DISPLAY_DEPTH)
 
 #ifdef __cplusplus
 }
