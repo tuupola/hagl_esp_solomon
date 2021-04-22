@@ -1,6 +1,7 @@
-# MIPI DCS HAL for HAGL Graphics Library
 
-HAL for HAGL graphics library for display drivers supporting the [MIPI Display Command Set](https://www.mipi.org/specifications/display-command-set). This covers most displays currently used by hobbyists. Tested with ST7735S, ST7789V, ST7789V2, ILI9341 and ILI9163. Works with both ESP32 and ESP32-S2.
+# Solomon HAL for HAGL Graphics Library
+
+HAL for HAGL graphics library for [Solomon Systech](https://www.solomon-systech.com/) based displays. Since they do not follow the MIPI DCS standard each SSDxxxx chip needs an ad hoc driver. Currently only SSD1351 is supported.  This code is still considered work in progress.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
@@ -26,14 +27,7 @@ You can also use the older GNU Make based build system.
 $ make menuconfig
 ```
 
-[Default configs](https://github.com/tuupola/hagl_esp_mipi/tree/master/sdkconfig/) are provided for popular dev boards. For example to compile for M5Stack do something like the following:
-
-```
-$ cp components/hagl_hal/sdkconfig/m5stack.defaults sdkconfig.defaults
-$ idf.py menuconfig
-```
-
-For example usage see [ESP GFX](https://github.com/tuupola/esp_gfx), [ESP effects](https://github.com/tuupola/esp_effects) and [Mandelbrot](https://github.com/tuupola/esp-examples/tree/master/014-mandelbrot).
+For example usage see [ESP effects Solomon branch](https://github.com/tuupola/esp_effects/tree/solomon).
 
 ## License
 
